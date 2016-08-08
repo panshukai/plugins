@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<style type="text/css">
+	div,ul,li,img{padding: 0;margin: 0;}
+	div{width: 100px;height: 100px;overflow:hidden;}
+	.clearFix{*zoom:1;}
+	.clearFix:after{ content:"."; clear:both; display:block; height:0; visibility:hidden;}/*清浮动*/
+	li{overflow: hidden;list-style: none;float: left;}
+	</style>
+</head>
+<body>
+<div>
+	<ul class="clearFix">
+		<li><img src="http://pic34.nipic.com/20131106/9903781_085713979000_2.jpg" /></li>
+		<li><img src="http://pic3.nipic.com/20090516/896190_010616569_2.jpg" /></li>
+		<li><img src="http://thumb.webps.cn/to/img/4/TB1EOhcHVXXXXcQXFXXXXXXXXXX_!!0-item_pic.jpg" /></li>
+	</ul>
+</div>
+
+<script type="text/javascript" src=""></script>
+<script src="http://cdn.bootcss.com/jquery/1.10.0/jquery.js"></script>
+<script type="text/javascript">
+/*
+name:基于jQuery的轮播图插件
+author:panshukai
+des:移入停止轮播，移出继续（功能不多，仅做练习）
+*/
+	(function ($,window) {
+		$.fn.extend({imgscroll:function(options){
+			var $this=$(this);	//$this代表最外div
+			var lisObj=$this.find('li');
+			var liWidth=lisObj.width();
+			var autoPlay=null;
+
+			settings={
+				width:100,
+				during:1000,
+				speed:3000
+			};
+			$.extend(settings,options);/*参数覆盖或扩充*/
+			$this.find('ul').css('width',lisObj.length*settings.width+'px');
+			for(var i=0;i<lisObj.length;i++){
+				lisObj.eq(i).css({'float':'left','width':settings.width+'px'});
+			}
+			$this.find('img').attr({'width':settings.width});
+
+			function animate(obj){/*动画函数*/
+				obj.animate({'marginLeft':-settings.width+'px'},settings.during,function(){
+				obj.appendTo(obj.parent('ul')).css("marginLeft","0px");
+				});
+			}
+
+			autoPlay=window.setInterval(function(){animate($this.find('li').eq(0));},settings.speed);
+
+			$this.on('mouseenter',function(){/*移入事件绑定的对象内，当前动画结束*/
+				if (parseInt($this.find('li').eq(0).attr('marginLeft'))>-settings.width) {
+					$this.find('li').eq(0).animate({'marginLeft':-settings.width+'px'},settings.during);
+				}
+				window.clearInterval(autoPlay);
+			});
+
+			$this.on('mouseleave',function(){/*鼠标移出对象后，执行动画*/
+				autoPlay=window.setInterval(function(){animate($this.find('li').eq(0));},settings.speed);
+			});	
+			$this.close=function(){
+				alert(2);
+			}
+			return $this;/*支持链式调用*/
+		}
+		})
+	})(jQuery,window)
+
+	 var aa=$('div').imgscroll({width:100,speed:3000});/*插件调用*/
+	 alert(1);
+	 aa.close();
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>瀑布流插件</title>
+	<style type="text/css">
+		body,ul,div,li{margin: 0;padding: 0;}
+		ul{position: relative;}
+        img{vertical-align: top;border: 0 none}
+		li{list-style: none;padding: 10px;border: 1px solid #ccc;position: absolute;left: 0px;top: 0px;
+            -webkit-transition: all 5s ease-in-out;-moz-transition: all 5s ease-in-out;-o-transition: all 5s ease-in-out;transition: all 5s ease-in-out;}
+	</style>
+</head>
+<body>
+<div>
+	<ul id="contain">
+        <li><a href="##"><img src="images/temp_img3.jpg" /></a></li>
+		<li><a href="##"><img src="images/temp_img2.jpg" /></a></li>
+		<li><a href="##"><img src="images/temp_img4.jpg" /></a></li>
+		<li><a href="##"><img src="images/temp_img5.jpg" /></a></li>
+		<li><a href="##"><img src="images/temp_img6.jpg" /></a></li>
+		<li><a href="##"><img src="images/temp_img7.jpg" /></a></li>
+		<li><a href="##"><img src="images/temp_img8.jpg" /></a></li> 
+		<li><a href="##"><img src="images/temp_img9.jpg" /></a></li>
+		<li><a href="##"><img src="images/temp_img10.jpg" /></a></li>
+	</ul>
+</div>
+<script type="text/javascript">
+/*
+name:原生js瀑布流插件（PS：造轮子）
+author:panshukai
+
+method:minValue
+得到单行最小高度的li的序号以及高度，并实现累加;
+method:show
+每增加一个li，定位到当前最小高度的列,实现瀑布流(图片来自转载).
+
+*/
+	function show(json){
+		var ulObj=document.getElementById('contain');
+		var lisObj=ulObj.getElementsByTagName('li');
+		var liWidth=json.liWidth;
+		var margin=json.margin;
+
+
+        var heightSum=[];
+		var bodyWidth=document.body.offsetWidth;
+		var colNum=Math.floor(bodyWidth/liWidth);
+        var topVal,topNum;
+        function minValue(arr,h){
+            var minNum=0;
+            var height=0;
+            for (var j = 0; j < colNum; j++) {
+                if(arr[j]<arr[minNum]){
+                    minNum=j;
+                }
+            }
+            // console.log(h)
+            height=arr[minNum];
+            arr[minNum] += (h + margin);
+            return [minNum,height];
+        }
+        for (var i = 0; i < colNum; i++) {
+            heightSum[i]=lisObj[i].clientHeight;
+        }
+
+
+        for (var i = 0; i < lisObj.length; i++) {
+            if(i<colNum){
+                lisObj[i].style.left=i*(liWidth+margin)+'px';
+                lisObj[i].style.top=0+'px';
+            }else{
+                // console.log(heightSum)
+                var h = lisObj[i].clientHeight;
+                var arr = minValue(heightSum,h);
+                topNum = arr[1];
+                lisObj[i].style.left=(arr[0]*(liWidth+margin))+'px';
+                lisObj[i].style.top=topNum + margin +'px';
+            }
+		}
+        window.onscroll=function(){
+            var scrollTop=document.body.scrollTop||document.documentElement.scrollTop;
+            if ((document.documentElement.scrollHeight-scrollTop<=document.documentElement.clientHeight)) {
+                var liNode=[],aNode=[],imgNode=[],imgSrc;
+                var frag=document.createDocumentFragment();
+                for(var i=0;i<colNum;i++){
+                    liNode[i]=document.createElement('li');
+                    aNode[i]=document.createElement('a');
+                    imgNode[i]=document.createElement('img');
+                    var random=Math.ceil((Math.random())*13)+2;
+                    imgSrc='images/temp_img'+random+'.jpg';
+                    imgNode[i].setAttribute('src',imgSrc);
+                    aNode[i].appendChild(imgNode[i]);
+                    liNode[i].appendChild(aNode[i]);
+                    frag.appendChild(liNode[i]);                       
+                }
+                document.getElementById('contain').appendChild(frag);
+                show(json);
+            }
+        }
+	}
+</script>
+<script type="text/javascript">
+window.onload=function(){
+    show({'margin':30,'liWidth':350}); //margin:上下左右边距大小,liWidth:单个li宽度大小
+}
+window.onresize=function(){
+    show({'margin':30,'liWidth':350}); 
+}
+</script>
+</body>
+</html>
