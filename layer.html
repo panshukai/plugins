@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			*{padding: 0;margin: 0;}
+			#cover{position: fixed;left:0;top:0;width: 100%;background-color: #000;opacity: 0.5;display: none;}
+			.layerM{position: fixed;background-color: #fff;display: none;}
+			#layerHead{line-height: 40px;}
+			#layerHead:hover{cursor: move;}
+			#lt,#rt,#rb,#lb{width: 5px;height: 5px;background-color: #f00;position: absolute;}
+			#lt{left: -5px;top: -5px;}
+			#rt{right: -5px;top: -5px;}
+			#lb{left: -5px;bottom: -5px;}
+			#rb{right: -5px;bottom: -5px;}
+			#l{width: 5px;background-color: #f00;position: absolute;left: -5px;top: 0px;}
+			#r{width: 5px;background-color: #f00;position: absolute;right: -5px;top: 0px;}
+			#t{height: 5px;background-color: #f00;position: absolute;left: 0px;top: -5px;}
+			#b{height: 5px;background-color: #f00;position: absolute;left: 0px;bottom: -5px;}
+			#lt:hover{cursor: nw-resize;}
+			#rt:hover{cursor: ne-resize;}
+			#lb:hover{cursor: sw-resize;}
+			#rb:hover{cursor: se-resize;}
+			#r:hover{cursor: e-resize;}
+			#l:hover{cursor: w-resize;}
+			#b:hover{cursor: s-resize;}
+			#t:hover{cursor: n-resize;}
+			/*.layerM:hover{cursor: crosshair;}*/
+			/*.padd{width: 100px;padding-top: 20%;}*/
+		</style>
+	</head>
+	<body>
+	<!-- <div class="padd"></div> -->
+		<button id="modalBtn">打开modal</button>
+		<div id="layer">
+			<div id="cover"></div>
+			<div class="layerM">
+				<div id="l"></div>
+				<div id="t"></div>
+				<div id="b"></div>
+				<div id="r"></div>
+				<div id="lt"></div>
+				<div id="rt"></div>
+				<div id="lb"></div>
+				<div id="rb"></div>
+				<header id="layerHead">标题名称</header>
+				<p>eakhdashdfjkashkdfa<span>11111</span></p>
+				<span>aaa</span>
+				<div>222</div>
+			</div>	
+		</div>
+		<script>
+		/*
+		params:
+			element——需要绑定的元素(此处使用querySelector)
+			isAt————是否有弹层内容决定宽高
+			isMove————弹层是否可移动
+			isChange————谈是否可拖拽使其改变大小
+			width————自定义弹层宽度，默认为400
+			height————自定义弹层高度，默认为200
+		调用接口(例)：
+			var layer1=new Area('.layerM',false,false,true,300,200);			
+			layer1.hide();				
+			layer1.show();
+			layer1.move();
+			layer1.change();
+		*/
+			function Area(element,isAt,isMove,isChange,width,height){
+				var data={
+					width:400,
+					height:200
+				};
+				this.element=element;
+				this.isAt=isAt;
+				this.isMove=isMove;
+				this.isChange=isChange;
+
+				this.layer=document.querySelector('#layer');
+				this.layerDom=document.querySelector('#layer').querySelector(element);
+				this.cover=layer.querySelector('#cover');
+				this.windowHeight=document.all ? document.getElementsByTagName("html")[0].offsetHeight : window.innerHeight;
+				this.windowWidth=document.all ? document.getElementsByTagName("html")[0].offsetWidth : window.innerWidth;
+				this.button=document.getElementById('modalBtn');
+				if(isAt){//根据弹出层中内容多少自动设置宽高
+					var maxWid=0;
+					for(var i=0;i<_this.layerDom.childNodes.length;i++){
+						if(_this.layerDom.childNodes[i].offsetWidth>maxWid){
+							maxWid=_this.layerDom.childNodes[i].offsetWidth;
+						}
+					}
+					this.width=maxWid;
+					this.height=document.querySelector('#layer').querySelector(element).offsetHeight;
+				}else{//自定义或者选择默认值
+					this.width=width?width:data.width;
+					this.height=height?height:data.height;
+				}
+			}
+			Area.prototype={
+				params:{
+					isRunMove:false,//移动标识
+					isRunChange:false,//拉伸缩放标识
+					left:0,//弹出层的显示定位值left
+					top:0,//弹出层的显示定位值top
+					offsetx:0,//鼠标相对于弹层的水平距离
+					offsety:0,//鼠标相对于弹层的垂直距离
+					eclientx:0,//点击鼠标的坐标x
+					eclienty:0,//点击鼠标的坐标y
+							
+				},
+				show:function(){//点击显示弹出层
+					var _this=this;
+					this.button.onclick=function(){
+						_this.cover.style.display='block';
+						_this.layerDom.style.display='block';						
+						_this.cover.style.height=_this.windowHeight+'px';
+						_this.layerDom.style.width=_this.width+'px';
+						_this.layerDom.style.height=_this.height+'px';
+						_this.layerDom.style.left=(_this.windowWidth/2-_this.width/2)+'px';
+						_this.layerDom.style.top=(_this.windowHeight/2-_this.height/2)+'px';
+						document.getElementById('l').style.height=_this.height+'px';
+						document.getElementById('r').style.height=_this.height+'px';
+						document.getElementById('t').style.width=_this.width+'px';
+						document.getElementById('b').style.width=_this.width+'px';
+					}				
+				},
+				hide:function(){//点击关闭弹出层
+					var _this=this;
+					_this.cover.onclick=function(){
+						_this.cover.style.display='none';
+						_this.layerDom.style.display='none';						
+					}
+				},
+				move:function(){//拖拽功能实现
+					if(this.isMove){
+						var _this=this;
+						_this.layerDom.addEventListener('mousedown',function(e){
+							this.onselectstart = function(){
+								return false;
+							}
+							var tWidth=document.querySelector('#layerHead').offsetWidth;
+							var tHeight=document.querySelector('#layerHead').offsetHeight;
+														
+							var event=e?e:window.event;
+							_this.params.left=_this.layerDom.offsetLeft;//弹层的定位left值
+							_this.params.top=_this.layerDom.offsetTop;//弹层的定位top值
+							_this.params.offsetx=event.clientX-_this.params.left;//鼠标相对弹出框的水平距离
+							_this.params.offsety=event.clientY-_this.params.top;//鼠标相对弹出框的垂直距离
+							_this.params.eclientx=event.clientX;//鼠标相对弹出框的水平距离
+							_this.params.eclienty=event.clientY;//鼠标相对弹出框的垂直距离
+		
+							if(_this.params.eclientx>_this.layerDom.offsetLeft&&_this.params.eclientx<(tWidth+_this.layerDom.offsetLeft)&&_this.params.eclienty>_this.layerDom.offsetTop&&_this.params.eclienty<(tHeight+_this.layerDom.offsetTop)){//判定在可移动区域内(头部)
+								console.log(1);
+								_this.params.isRunMove=true;
+							}
+							_this.layerDom.onmousemove=function(e){
+								if(_this.params.isRunMove===true){
+									console.log(2);
+									var event=e?e:window.event;
+									_this.layerDom.style.left=_this.params.left+event.clientX-_this.params.eclientx+'px';
+									_this.layerDom.style.top=_this.params.top+event.clientY-_this.params.eclienty+'px';							
+								}
+							};
+							_this.layerDom.onmouseup=function(e){
+								_this.params.isRunMove=false;
+								// _this.layerDom.onmousedown=null;//取消事件绑定
+								_this.layerDom.onmousemove=null;
+								_this.layerDom.onmouseup=null;
+							};						
+						});
+
+					}else{
+						return false;
+					}
+				},
+				change:function(){
+					var _this=this;
+					if (this.isChange) {
+						
+						_this.layerDom.addEventListener('mousedown',function(e){							
+							var thisLayer=this;
+							//防止文字选中
+							this.onselectstart = function(){
+								return false;
+							}
+							
+							var event=e?e:window.event;
+							_this.params.left=thisLayer.offsetLeft;
+							_this.params.top=thisLayer.offsetTop;
+							var width=thisLayer.offsetWidth;//当前弹层的宽度
+							var height=thisLayer.offsetHeight;//当前弹层的高度
+							var borderW=document.getElementById('t').offsetWidth;//边框宽
+							var borderH=document.getElementById('l').offsetHeight;//边框高
+
+							_this.params.eclientx=event.clientX;
+							_this.params.eclienty=event.clientY;
+							_this.params.offsetx=event.clientX-_this.params.left;//鼠标相对弹出框的水平距离
+							_this.params.offsety=event.clientY-_this.params.top;//鼠标相对弹出框的垂直距离
+
+							// if(_this.params.eclientx>(_this.params.left-5)&&_this.params.eclientx>_this.params.left&&_this.params.eclienty>_this.params.top-5&&_this.params.eclienty<thisLayer.offsetTop){//判定点击范围是否在改变大小范围内
+							// 	_this.params.isRunChange=true;
+							// }
+							_this.params.isRunChange=true;
+							document.onmousemove=function(e){//事件触发对象应该是document
+								if(_this.params.isRunChange===true){
+									var event=e?e:window.event;
+										if (_this.params.offsetx<0&&_this.params.offsetx>-5&&_this.params.offsety<0&&_this.params.offsety>-5&&(width-(event.clientX-_this.params.eclientx))>_this.width&&(height-(event.clientY-_this.params.eclienty))>_this.height){//左上5*5放大且不能小于限定宽高
+											thisLayer.style.width=(width-(event.clientX-_this.params.eclientx))+'px';
+											thisLayer.style.height=(height-(event.clientY-_this.params.eclienty))+'px';
+											thisLayer.style.top=(_this.params.top+event.clientY-_this.params.eclienty)+'px';
+											thisLayer.style.left=(_this.params.left+event.clientX-_this.params.eclientx)+'px';
+											console.log('左上');
+											document.getElementById('l').style.height=(borderH-(event.clientY-_this.params.eclienty))+'px';
+											document.getElementById('r').style.height=(borderH-(event.clientY-_this.params.eclienty))+'px';
+											document.getElementById('t').style.width=(borderW-(event.clientX-_this.params.eclientx))+'px';
+											document.getElementById('b').style.width=(borderW-(event.clientX-_this.params.eclientx))+'px';
+	  
+										}else if(_this.params.offsetx<(width+5)&&_this.params.offsetx>(width)&&_this.params.offsety<0&&_this.params.offsety>-5&&(width+(event.clientX-_this.params.eclientx))>_this.width&&(height-(event.clientY-_this.params.eclienty))>_this.height){//右上5*5区块放大且不能小于限定宽高
+											thisLayer.style.width=(width+(event.clientX-_this.params.eclientx))+'px';
+											thisLayer.style.height=(height-(event.clientY-_this.params.eclienty))+'px';
+											thisLayer.style.top=(_this.params.top+event.clientY-_this.params.eclienty)+'px';
+											console.log('右上');
+											document.getElementById('l').style.height=(borderH-(event.clientY-_this.params.eclienty))+'px';
+											document.getElementById('r').style.height=(borderH-(event.clientY-_this.params.eclienty))+'px';
+											document.getElementById('t').style.width=(borderW+(event.clientX-_this.params.eclientx))+'px';
+											document.getElementById('b').style.width=(borderW+(event.clientX-_this.params.eclientx))+'px'; 
+										}else if(_this.params.offsetx<(width+5)&&_this.params.offsetx>(width)&&_this.params.offsety<(height+5)&&_this.params.offsety>(height)&&(width+(event.clientX-_this.params.eclientx))>_this.width&&(height+(event.clientY-_this.params.eclienty))>_this.height){//右下5*5区块放大且不能小于限定宽高
+											thisLayer.style.width=(width+(event.clientX-_this.params.eclientx))+'px';
+											thisLayer.style.height=(height+(event.clientY-_this.params.eclienty))+'px';
+											console.log('右下');
+											document.getElementById('l').style.height=(borderH+(event.clientY-_this.params.eclienty))+'px';
+											document.getElementById('r').style.height=(borderH+(event.clientY-_this.params.eclienty))+'px';
+											document.getElementById('t').style.width=(borderW+(event.clientX-_this.params.eclientx))+'px';
+											document.getElementById('b').style.width=(borderW+(event.clientX-_this.params.eclientx))+'px';
+										}else if(_this.params.offsetx<0&&_this.params.offsetx>-5&&_this.params.offsety<(height+5)&&_this.params.offsety>(height)&&(width-(event.clientX-_this.params.eclientx))>_this.width&&(height+(event.clientY-_this.params.eclienty))>_this.height){//左下5*5区块放大且不能小于限定宽高
+											thisLayer.style.width=(width-(event.clientX-_this.params.eclientx))+'px';
+											thisLayer.style.height=(height+(event.clientY-_this.params.eclienty))+'px';
+											thisLayer.style.left=(_this.params.left+event.clientX-_this.params.eclientx)+'px';
+											console.log('左下');
+											document.getElementById('l').style.height=(borderH+(event.clientY-_this.params.eclienty))+'px';
+											document.getElementById('r').style.height=(borderH+(event.clientY-_this.params.eclienty))+'px';
+											document.getElementById('t').style.width=(borderW-(event.clientX-_this.params.eclientx))+'px';
+											document.getElementById('b').style.width=(borderW-(event.clientX-_this.params.eclientx))+'px';
+										}else if(_this.params.offsetx<0&&_this.params.offsetx>-5&&_this.params.offsety>0&&_this.params.offsety<(height)&&(width-(event.clientX-_this.params.eclientx))>_this.width){//左边中间5*（边框高）区块横向放大且不能小于限定宽高
+											thisLayer.style.width=(width-(event.clientX-_this.params.eclientx))+'px';
+											thisLayer.style.left=(_this.params.left+event.clientX-_this.params.eclientx)+'px';
+											console.log('左边');
+											document.getElementById('t').style.width=(borderW-(event.clientX-_this.params.eclientx))+'px';
+											document.getElementById('b').style.width=(borderW-(event.clientX-_this.params.eclientx))+'px';
+										}else if(_this.params.offsetx<(width+5)&&_this.params.offsetx>(width)&&_this.params.offsety>0&&_this.params.offsety<(height)&&(width+(event.clientX-_this.params.eclientx))>_this.width){//右边中间5*（边框高）区块横向放大且不能小于限定宽高
+											thisLayer.style.width=(width+(event.clientX-_this.params.eclientx))+'px';
+											console.log('右边');
+											document.getElementById('t').style.width=(borderW+(event.clientX-_this.params.eclientx))+'px';
+											document.getElementById('b').style.width=(borderW+(event.clientX-_this.params.eclientx))+'px';
+										}else if(_this.params.offsetx<(width)&&_this.params.offsetx>0&&_this.params.offsety>-5&&_this.params.offsety<0&&(height-(event.clientY-_this.params.eclienty))>_this.height){//上边中间5*（边框宽）区块纵向放大且不能小于限定宽高
+											thisLayer.style.height=(height-(event.clientY-_this.params.eclienty))+'px';
+											thisLayer.style.top=(_this.params.top+event.clientY-_this.params.eclienty)+'px';
+											console.log('上边');
+											document.getElementById('l').style.height=(borderH-(event.clientY-_this.params.eclienty))+'px';
+											document.getElementById('r').style.height=(borderH-(event.clientY-_this.params.eclienty))+'px';
+										}else if(_this.params.offsetx<(width)&&_this.params.offsetx>0&&_this.params.offsety>(height)&&_this.params.offsety<(height+5)&&(height+(event.clientY-_this.params.eclienty))>_this.height){//下边中间5*（边框宽）区块纵向放大且不能小于限定宽高
+											thisLayer.style.height=(height+(event.clientY-_this.params.eclienty))+'px';
+											console.log('下边');
+											document.getElementById('l').style.height=(borderH+(event.clientY-_this.params.eclienty))+'px';
+											document.getElementById('r').style.height=(borderH+(event.clientY-_this.params.eclienty))+'px';
+										}
+									/*}else{
+										return false;
+									}*/														
+								}
+							};
+							document.onmouseup=function(e){
+								_this.params.isRunChange=false;
+								_this.layerDom.onmouseup=null;
+								document.onmousemove=null;//重置document的事件
+								document.onmouseup=null;
+
+							}
+							
+						});
+					}else{
+						return false;
+					}
+				}
+			}
+			var layer1=new Area('.layerM',false,true,true,300,200);			
+			layer1.hide();				
+			layer1.show();
+			layer1.move();
+			layer1.change();
+		</script>
+	</body>
+</html>
