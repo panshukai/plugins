@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>3D旋转轮播</title>
+	<style type="text/css">
+		*{padding: 0;margin:0;}
+		/*perspective景深：数值越大，3d效果越扁平，越不明显*/
+		.stage{perspective: 6600px;position: relative;width: 200px;margin: 0 auto;}
+		ul{ width: 100px;
+			min-height: 100px;
+   	 		margin-top: 200px;    
+    		margin-left: -50px;  
+            -webkit-transition: -webkit-transform 1s;  
+            transition: transform 1s;
+            /*-webkit-transform-style: preserve-3d;
+ transform-style 属性规定如何在 3D 空间中呈现被嵌套的元素。默认flat（平的），我们3D效果，然后选择3D。*/ 
+            -webkit-transform-style: preserve-3d;  
+            position: absolute;  
+            left: 50%;}
+		li{list-style: none;}
+		ul li{position: absolute;width: 100px;height: 100px;bottom: 0;}
+		ul li:nth-child(1){/*left: 100px;*/z-index: 1;transform: rotateY(0deg) translateZ(400px);background-color: red;}
+		ul li:nth-child(2){/*left: 200px;*/z-index: 1;transform: rotateY(60deg) translateZ(400px);background-color: blue;}
+		ul li:nth-child(3){/*left: 200px;*/z-index: 1;transform: rotateY(120deg) translateZ(400px);background-color: green;}
+		ul li:nth-child(4){/*left: 100px;*/z-index: 1;transform: rotateY(180deg) translateZ(400px);background-color: black;}
+		ul li:nth-child(5){/*left: 0px;*/z-index: 1;transform: rotateY(240deg) translateZ(400px);background-color: yellow;}
+		ul li:nth-child(6){/*left: 0px;*/z-index: 1;transform: rotateY(300deg) translateZ(400px);background-color: purple;}
+		ul img{}
+	</style>
+</head>
+<body>
+<div class="stage">
+	<ul>
+		<li><img width="100" height="50" src="http://a.ssjj.com/upload/2016/06/14/14658943173751zzsim.png"></li>
+		<li><img width="100" height="50" src="http://a.ssjj.com/upload/2016/06/27/146701137193dke56.png"></li>
+		<li><img width="100" height="50" src="http://a.ssjj.com/upload/2016/06/27/1467028272813994j6u.png "></li>
+		<li><img width="100" height="50" src="http://a.ssjj.com/upload/2016/06/27/146701166845832gg29.png "></li>
+		<li><img width="100" height="50" src="http://a.ssjj.com/upload/2016/06/27/1467007050829hupq0.png "></li>
+		<li><img width="100" height="50" src="http://a.ssjj.com/upload/2016/06/27/1467006741717ubs4r.png "></li>
+	</ul>	
+</div>
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script type="text/javascript">
+	function transform(element, value, key) {  
+        key = key || "transform";  
+        ["-moz-", "-o-", "-ms-", "-webkit-", ""].forEach(function (prefix)  
+        {  
+            element.style[prefix + key] = value;  
+        });  
+
+        return element;  
+    }
+    function transform1(element, value, key) {  
+        key = key || "transform";  
+            element.style[key] = value;   
+
+        return element;  
+    }  
+  
+    $(function ()  
+    {  
+        var deg = 60 , i = 1;  
+        $("ul").click(function ()  
+        {  
+            transform($(this)[0], "rotateY(" + (deg * i++) + "deg)")  
+        });  
+    });  
+</script>
+</body>
+</html>

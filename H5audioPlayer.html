@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>音乐播放器</title>
+	<link href="http://cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+	<style type="text/css">
+		.flex{display: flex;}
+		.flex div{flex: 2;}
+		.flex span{flex: 1;cursor: pointer;}
+		.pgs{width: 100%;position: relative;padding-top: 20px;}
+		.whole{background-color: #ccc;width: 100%;height: 10px;position: absolute;left: 0;top: 20px;}
+		.hvPlay{background-color: green;width: 0;height: 10px;position: absolute;left: 0;top: 20px;}
+		.pgsDot{position: absolute;left:0;top: 15px;width: 20px;height: 20px;background-color: green;border-radius: 20px;}
+		.pgsDot:hover{cursor: pointer;}
+/*		.volpgs{width: 10px;height:80px;position: relative;padding-top: 20px;}
+		.volwhole{background-color: #ccc;width: 100%;height: 10px;position: absolute;left: 0;top: 20px;}
+		.volhvPlay{background-color: green;width: 0;height: 10px;position: absolute;left: 0;top: 20px;}
+		.volpgsDot{position: absolute;left:0;top: 15px;width: 20px;height: 20px;background-color: green;border-radius: 20px;}
+		.volpgsDot:hover{cursor: pointer;}*/
+	</style>
+</head>
+<body>
+<div class="container">
+	<div class="row">
+		<div class="col-xs-9">
+			<h3>林忆莲 - 我不能忘记你</h3>
+			<p>林忆莲</p>
+			<div class="flex">
+				<div><i>00:00</i>/<em>04:48</em></div>
+				<span>音量</span>
+				<span id="play">play</span><!--播放按钮-->
+				<span id="pause">pause</span><!--暂停按钮-->
+				<!-- <span id="vol">vol</span> -->
+			</div>
+			<div class="volpgs">
+				<div class="volwhole"></div>
+				<span class="volpgsDot"></span>
+				<div class="volhvPlay"></div>
+			</div>
+			<div class="pgs">
+				<div class="whole"></div>
+				<span class="pgsDot"></span>
+				<div class="hvPlay"></div>
+			</div>
+			<audio id="audio" controls="true" style="margin-top: 20px;">
+				<source src="http://fs.web.kugou.com/eafbc65d283e6baf301591e2ef295b63/58f9a0fc/G099/M08/1A/01/Q5QEAFjwoS6ADb5cAEZehleNLfI231.mp3" type="audio/mpeg">
+  				Your browser does not support the <code>audio</code> element.	
+			</audio>
+		</div>
+		<div class="col-xs-3">
+			<!-- <img src="http://singerimg.kugou.com/uploadpic/softhead/400/20170109/20170109113028943.jpg" alt="林忆莲-不能忘记你" class="img-circle"> -->
+		</div>			
+	</div>
+</div>
+<script src="http://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script src="http://cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+	var durT=null;
+	var wholeW=$('.whole').width();//播放进度条总长
+	function format(obj){//播放进度时间格式化
+		var intObj=parseInt(obj);
+		var sec=0;
+		var min=0;
+		var time=null;
+		if(Number(intObj)%60<10){
+			sec='0'+(Number(intObj)%60);
+		}else{
+			sec=String(Number(intObj)%60);
+		}
+		if((Math.ceil(Number(intObj))/60)<10){
+			min='0'+(Math.floor(Number(intObj)/60));
+		}else{
+			min=String(Math.floor(Number(intObj)/60));
+		}
+		time=min+':'+sec;
+		return time;
+	}
+	function unformat(obj){
+		var currentT=obj;
+		var dotIndex=String(currentT).indexOf(':');
+		var min=parseInt(String(currentT).substring(0,dotIndex),10);
+		var sec=parseInt(String(currentT).substring(dotIndex+1),10);
+		var time=0;
+		time=min*60+sec;
+		return time;
+	}
+	$('#play').click(function(){//播放
+		console.log('play');
+		var play=document.getElementById('audio');
+		play.play();
+		durT=window.setInterval(function(){
+				$('.flex div i').text(format(document.getElementById('audio').currentTime));
+				var actual=document.getElementById('audio').currentTime/(unformat($('.flex em').text()));
+				$('.hvPlay').width(wholeW*actual);
+				$('.pgsDot').css('left',(wholeW*actual)+'px');
+			 },0);
+	});
+	$('#pause').click(function(){//暂停
+		console.log('pause');
+		document.getElementById('audio').pause();
+		window.clearInterval(durT);
+	});
+	var clx=null;
+	$('.pgsDot').on('mousedown',function(e){
+		var downPos=$(this).position().left;
+		console.log(wholeW);
+		clx=e.clientX;
+		$(document).on('mousemove',function(event){
+			var e=event||window.event;
+			var nowPos=downPos+e.clientX-clx;
+			$('.hvPlay').width(nowPos);
+			$('.pgsDot').css('left',nowPos+'px');
+			var percent=nowPos/wholeW;
+			$('.flex div i').text(format(unformat($('.flex em').text())*percent));//显示当前播放进度
+			document.getElementById('audio').currentTime=unformat($('.flex em').text())*percent;
+			$('#play').trigger('click');
+		});
+		$(document).on('mouseup',function(){
+			$(document).off('mousemove mouseup');//取消mousemove的事件绑定
+		});
+	});
+	setInterval(function(){
+		console.log(document.getElementById('audio').volume);
+	},1000);
+	
+</script>
+</body>
+</html>
