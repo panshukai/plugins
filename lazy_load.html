@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		*{
+			padding: 0;
+			margin: 0;
+		}
+		img{
+			border: 0 none;
+			vertical-align: middle;
+		}
+		ul{
+			list-style: none;
+		}
+	</style>
+</head>
+<body>
+	<ul>
+		<li><img width="100%" height="400" class="lazyLoad" src="http://m.issjj.com/static/web/img/loadings.gif" data-src="http://ssjj2res.issjj.com/static/img/welcome/17173_8a636a6.png" alt=""></li>
+		<li><img width="100%" height="400" class="lazyLoad" src="http://m.issjj.com/static/web/img/loadings.gif" data-src="http://ssjj2res.issjj.com/static/img/welcome/17173_8a636a6.png" alt=""></li>
+		<li><img width="100%" height="400" class="lazyLoad" src="http://m.issjj.com/static/web/img/loadings.gif" data-src="http://ssjj2res.issjj.com/static/img/welcome/17173_8a636a6.png" alt=""></li>
+		<li><img width="100%" height="400" class="lazyLoad" src="http://m.issjj.com/static/web/img/loadings.gif" data-src="http://ssjj2res.issjj.com/static/img/welcome/17173_8a636a6.png" alt=""></li>
+		<li style="display: none;"><img width="100%" height="400" class="lazyLoad" src="http://m.issjj.com/static/web/img/loadings.gif" data-src="http://ssjj2res.issjj.com/static/img/welcome/17173_8a636a6.png" alt=""></li>
+		<li style="display: none;"><div><a href="" class="a"><img width="100%" height="400" class="lazyLoad" src="http://m.issjj.com/static/web/img/loadings.gif" data-src="http://ssjj2res.issjj.com/static/img/welcome/17173_8a636a6.png" alt=""></a></div></li>
+		<li style="display: none;"><img width="100%" height="400" class="lazyLoad" src="http://m.issjj.com/static/web/img/loadings.gif" data-src="http://ssjj2res.issjj.com/static/img/welcome/17173_8a636a6.png" alt=""></li>
+		<li><img style="display: none;" width="100%" height="400" class="lazyLoad" src="http://m.issjj.com/static/web/img/loadings.gif" data-src="http://ssjj2res.issjj.com/static/img/welcome/17173_8a636a6.png" alt=""></li>
+		<li><img style="display: none;" width="100%" height="400" class="lazyLoad" src="http://m.issjj.com/static/web/img/loadings.gif" data-src="http://ssjj2res.issjj.com/static/img/welcome/17173_8a636a6.png" alt=""></li>
+		<li><img width="100%" height="400" class="lazyLoad" src="http://m.issjj.com/static/web/img/loadings.gif" data-src="http://ssjj2res.issjj.com/static/img/welcome/17173_8a636a6.png" alt=""></li>
+		<li><img width="100%" height="400" class="lazyLoad" src="http://m.issjj.com/static/web/img/loadings.gif" data-src="http://ssjj2res.issjj.com/static/img/welcome/17173_8a636a6.png" alt=""></li>
+		<li><img width="100%" height="400" class="lazyLoad" src="http://m.issjj.com/static/web/img/loadings.gif" data-src="http://ssjj2res.issjj.com/static/img/welcome/17173_8a636a6.png" alt=""></li>
+		<li><img width="100%" height="400" class="lazyLoad" src="http://m.issjj.com/static/web/img/loadings.gif" data-src="http://ssjj2res.issjj.com/static/img/welcome/17173_8a636a6.png" alt=""></li>
+	</ul>
+	<script src="https://cdn.bootcss.com/jquery/1.12.3/jquery.min.js"></script>
+	<script>
+var basic={
+    debounce:function(func, time) { //防抖(多用于resize等)
+        var timer;
+        return function() {
+            var context = this,
+                arg = arguments;
+            // 每次事件被触发时，都去清除之前的旧定时器
+		    if(timer) {
+		        clearTimeout(timer)
+		    }
+            timer = setTimeout(function() {
+                func.apply(context, arg);
+            }, time);           
+        }
+    },
+    throttle:function(func, time) { //节流(多用于用户频繁操作：keydown scroll等)
+        var last = 0;
+        return function() {
+            var nextTime = + new Date();
+            if (nextTime - last > time) {
+                func.apply(this, arguments);
+                last = nextTime;
+            }
+        }
+    }
+};
+
+function throttle(fn,delay){
+	var last = 0;//记录上次触发的时间
+	var timer = null;//settimeout序列号
+	return function(){
+		var content = this;//保留fn调用时的上下文
+		var arg = arguments;//fn的参数
+		var now = +new Date();
+
+		//如果未到延迟时间，则走debounce
+		if(now - last < delay){
+			clearTimeout(timer);
+			timer = setTimeout(function(){
+				fn.apply(content,arg);
+				last = now;
+			},delay);			
+		}else{
+			//到时间，走throttle
+			fn.apply(content,arg);
+			last = now;
+		}
+	}
+}
+
+var lazyLoad = {
+    imgs:document.querySelectorAll('img'),
+    bgImgs:document.querySelectorAll('.lazy-load-img'),
+    imgsArr:(function(){
+        var imgsArr =[];
+        for(var i = 0;i<document.querySelectorAll('img').length;i++){
+            imgsArr.push(i);
+        }
+        console.log(imgsArr.length);
+        return imgsArr;
+    })(),
+    bgImgsArr:(function(){
+        var bgImgsArr =[];
+        for(var i = 0;i<document.querySelectorAll('.lazy-load-img').length;i++){
+            bgImgsArr.push(i);
+        }
+        console.log(bgImgsArr.length);
+        return bgImgsArr;
+    })(),
+    loadImg:function(){
+        var sT = document.documentElement.scrollTop + document.body.scrollTop;
+        var wH = document.documentElement.clientHeight;
+        for(var i = 0;i<this.imgsArr.length;i++){
+            if(this.imgs[this.imgsArr[i]].src.indexOf('load')>-1 && !!this.imgs[this.imgsArr[i]].getAttribute('data-src')){
+                if(this.imgs[this.imgsArr[i]].getBoundingClientRect().top<=wH){
+                    this.imgs[this.imgsArr[i]].src = this.imgs[this.imgsArr[i]].getAttribute('data-src');
+                    this.imgsArr.splice(i,1);
+                    i--;
+                }
+            }
+        }
+        for (var i = 0; i < this.bgImgsArr.length; i++) {
+            if($(this.bgImgs[this.bgImgsArr[i]]).css('background').indexOf('load')>-1 && !!this.bgImgs[this.bgImgsArr[i]].getAttribute('data-src')){
+                if(this.bgImgs[this.bgImgsArr[i]].getBoundingClientRect().top<=wH){
+                    this.bgImgs[this.bgImgsArr[i]].style.backgroundImage = 'url(' + this.bgImgs[this.bgImgsArr[i]].getAttribute('data-src') + ')';
+                    this.bgImgsArr.splice(i,1);
+                    i--;
+                }
+            }
+        }
+    }
+};
+$(function(){
+    lazyLoad.loadImg();
+});
+$(window).scroll(basic.throttle(function(){lazyLoad.loadImg()},0));
+$(window).resize(basic.debounce(function(){lazyLoad.loadImg()},0));		
+	</script>
+</body>
+</html>
